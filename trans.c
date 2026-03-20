@@ -101,7 +101,8 @@ void textFile(FILE *readPtr)
 void updateRecord(FILE *fPtr)
 {
     unsigned int account; // account number
-    double transaction;   // transaction amount
+    int option;
+    double amount;   // transaction amount
     // create clientData with no information
     struct clientData client = {0, "", "", 0.0};
 
@@ -122,16 +123,39 @@ void updateRecord(FILE *fPtr)
     { // update record
         printf("%-6d%-16s%-11s%10.2f\n\n", client.acctNum, client.lastName, client.firstName, client.balance);
 
-        // request transaction amount from user
-        printf("%s", "Enter charge ( + ) or payment ( - ): ");
-        scanf("%lf", &transaction);
-        client.balance += transaction; // update record balance
+        // NEW MENU
+        printf("\n1. Deposit\n2. Withdraw\nEnter option: ");
+        scanf("%d", &option);
 
-        printf("%-6d%-16s%-11s%10.2f\n", client.acctNum, client.lastName, client.firstName, client.balance);
+        printf("Enter amount: ");
+        scanf("%lf", &amount);
+
+        if (option == 1)
+        {
+            client.balance += amount;
+            printf("Deposit successful!\n");
+        }
+        else if (option == 2)
+        {
+            if (client.balance - amount < 500 )
+            {
+                printf("Insufficient balance! Minimum balance is 500\n");
+                return;
+            }
+            client.balance -= amount;
+            printf("Withdrawal successful!\n");
+        }
+        else
+        {
+            printf("Invalid option\n");
+            return;
+        }
+
+        printf("Updated Balance: %.2f\n", client.balance);
 
         // move file pointer to correct record in file
         // move back by 1 record length
-        fseek(fPtr, -sizeof(struct clientData), SEEK_CUR);
+        fseek(fPtr, -(long)sizeof(struct clientData), SEEK_CUR);
         // write updated record over old record in file
         fwrite(&client, sizeof(struct clientData), 1, fPtr);
     } // end else
